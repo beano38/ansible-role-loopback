@@ -1,0 +1,58 @@
+---
+# tasks file for loopback
+
+# Create Interface if it doesn't exist
+- name: Create Interfaces
+  netbox_device_interface:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      device: "{{ loopback.device }}"
+      name: "Loopback{{ loopback.interface }}"
+      type: "{{ loopback.type }}"
+      enabled: True
+    state: present
+  register: int
+
+# Add IP addresses to Interfaces
+- name: Attach IPv4 Address to Interface
+  netbox_ip_address:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      prefix: "{{ parent_ipv4_prefix }}"
+      assigned_object:
+        device: "{{ interface.device }}"
+        name: "Loopback{{ loopback.interface }}"
+    state: new
+  register: ipv4
+
+- name: Attach IPv6 Address to Interface
+  netbox_ip_address:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      prefix: "{{ parent_ipv6_prefix }}"
+      assigned_object:
+        device: "{{ interface.device }}"
+        name: "Loopback{{ loopback.interface }}"
+    state: new
+  register: ipv6
+
+# Configure Interconnect in NSO to push to actual NEs
+- name: Push interconnect config to NSO for deployment
+  nso_config:
+    url: "{{ nso_url }}"
+    username: "{{ nso_username }}"
+    password: "{{ nso_password }}"
+    data:
+      loopback.loopback:
+      - name: "{{ interconnect.name }}"
+        device-interfaces:
+        - device: "{{ interface.device }}"
+          intf-number: "{{ loopback.interface }}"
+          description: "{{ interface.device }} Loopback"
+          ipv4_address: "{{ ipv4.results[0].ip_address.address[:-3] }}"
+          ipv4_mask: "{{ ipv4_prefix_mask }}"
+          ipv6_address: "{{ ipv6.results[0].ip_address.address[:-4] }}"
+          ipv6_length: "{{ ipv6_prefix_length }}"
