@@ -10,11 +10,11 @@ nso_password: admin
 site_name: site
 
 loopback:
-  name: P01
+  name: P01-L0
   prefix_role: core-loopback
   type: virtual
   device: P01-XR9KV
-  interface: 0
+  interface: "0"
 
 
 parent_ipv4_prefix: 172.16.0.0/25

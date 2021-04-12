@@ -21,8 +21,9 @@
     netbox_token: "{{ netbox_token }}"
     data:
       prefix: "{{ parent_ipv4_prefix }}"
+      role: Loopback
       assigned_object:
-        device: "{{ interface.device }}"
+        device: "{{ loopback.device }}"
         name: "Loopback{{ loopback.interface }}"
     state: new
   register: ipv4
@@ -33,8 +34,9 @@
     netbox_token: "{{ netbox_token }}"
     data:
       prefix: "{{ parent_ipv6_prefix }}"
+      role: Loopback
       assigned_object:
-        device: "{{ interface.device }}"
+        device: "{{ loopback.device }}"
         name: "Loopback{{ loopback.interface }}"
     state: new
   register: ipv6
@@ -46,13 +48,12 @@
     username: "{{ nso_username }}"
     password: "{{ nso_password }}"
     data:
-      loopback.loopback:
-      - name: "{{ interconnect.name }}"
-        device-interfaces:
-        - device: "{{ interface.device }}"
-          intf-number: "{{ loopback.interface }}"
-          description: "{{ interface.device }} Loopback"
-          ipv4_address: "{{ ipv4.results[0].ip_address.address[:-3] }}"
-          ipv4_mask: "{{ ipv4_prefix_mask }}"
-          ipv6_address: "{{ ipv6.results[0].ip_address.address[:-4] }}"
-          ipv6_length: "{{ ipv6_prefix_length }}"
+      loopback:loopback:
+      - name: "{{ loopback.name }}"
+        device: "{{ loopback.device }}"
+        intf-number: "{{ loopback.interface }}"
+        description: "{{ loopback.device }} Loopback"
+        ipv4_address: "{{ ipv4.ip_address.address[:-3] }}"
+        ipv4_mask: "{{ ipv4_prefix_mask }}"
+        ipv6_address: "{{ ipv6.ip_address.address[:-3] }}"
+        ipv6_length: "{{ ipv6_prefix_length }}"
