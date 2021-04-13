@@ -2,14 +2,14 @@
 # tasks file for loopback
 
 # Create Interface if it doesn't exist
-- name: Create Interfaces
+- name: "Create Interfaces {{ loopback.device }}"
   netbox_device_interface:
     netbox_url: "{{ netbox_url }}"
     netbox_token: "{{ netbox_token }}"
     data:
       device: "{{ loopback.device }}"
       name: "Loopback{{ loopback.interface }}"
-      type: "{{ loopback.type }}"
+      type: "{{ loopback.type | default('virtual')}}"
       enabled: True
     state: present
   register: int
@@ -41,8 +41,8 @@
     state: new
   register: ipv6
 
-# Configure Interconnect in NSO to push to actual NEs
-- name: Push interconnect config to NSO for deployment
+# Configure Loopback in NSO to push to actual NEs
+- name: Push Loopback config to NSO for deployment
   nso_config:
     url: "{{ nso_url }}"
     username: "{{ nso_username }}"
